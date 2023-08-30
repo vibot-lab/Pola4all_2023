@@ -1,0 +1,50 @@
+<launch>
+    <arg name="publish_frequency" default="70" />
+
+    <!-- If a free-run mode, a thread is used to retrieve the images from -->
+    <!-- all the cameras, and publish them as soon as possible. If we do -->
+    <!-- not use the free-run mode, a service must be used to request -->
+    <!-- to publish the images. -->
+    <arg name="free_run_mode" default="true" />
+
+    <!-- Camera bit depth. Only the bit-depths 8 and 12 have been implemented.-->
+    <arg name="bit_depth" default="12" />
+
+    <!-- Camera names are the user defined camera name. If this -->
+    <!-- variable is empty, the first found camera will be used. An -->
+    <!-- empty camera name can be used when only one camera is present. -->
+    <arg name="master_cameras_names_left" default="[Ace_POLA_RGB_01]"/>
+    <arg name="slave_cameras_names_left" default="[]"/>
+    <arg name="master_cameras_names_right" default="[Ace_POLA_RGB_02]"/>
+    <arg name="slave_cameras_names_right" default="[]"/>
+
+    <!-- Possible Driver names: -->
+    <!-- *) BaslerUSB -->
+    <!-- *) EthernetDriver -->
+    <!-- *) TemplateDriver -->
+    <!-- TODO: EthernetDriver is not implemented yet -->
+    <arg name="master_cameras_drivers_left" default="[BaslerUSB]"/>
+    <arg name="slave_cameras_drivers_left" default="[]"/>
+    <arg name="master_cameras_drivers_right" default="[BaslerUSB]"/>
+    <arg name="slave_cameras_drivers_right" default="[]"/>
+
+    <node pkg="polarimetric_camera_server" type="start_camera_server_app" name="CameraRosServerNode_left" output="screen">
+        <param name="freq" type="int" value="$(arg publish_frequency)"/>
+        <param name="mode" type="bool" value="$(arg free_run_mode)"/>
+        <param name="bit_depth" type="int" value="$(arg bit_depth)"/>
+        <rosparam param="master_cameras_names" subst_value="True">$(arg master_cameras_names_left)</rosparam>
+        <rosparam param="slave_cameras_names" subst_value="True">$(arg slave_cameras_names_left)</rosparam>
+        <rosparam param="master_cameras_drivers" subst_value="True">$(arg master_cameras_drivers_left)</rosparam>
+        <rosparam param="slave_cameras_drivers" subst_value="True">$(arg slave_cameras_drivers_left)</rosparam>
+    </node>
+
+    <node pkg="polarimetric_camera_server" type="start_camera_server_app" name="CameraRosServerNode_right" output="screen">
+        <param name="bit_depth" type="int" value="$(arg bit_depth)"/>
+        <param name="freq" type="int" value="$(arg publish_frequency)"/>
+        <param name="mode" type="bool" value="$(arg free_run_mode)"/>
+        <rosparam param="master_cameras_names" subst_value="True">$(arg master_cameras_names_right)</rosparam>
+        <rosparam param="slave_cameras_names" subst_value="True">$(arg slave_cameras_names_right)</rosparam>
+        <rosparam param="master_cameras_drivers" subst_value="True">$(arg master_cameras_drivers_right)</rosparam>
+        <rosparam param="slave_cameras_drivers" subst_value="True">$(arg slave_cameras_drivers_right)</rosparam>
+    </node>
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+    <!-- <arg name="user_camera_name" default="Ace_POLA_RGB_02" /> -->
+    <arg name="user_camera_name" default="" />
+
+    <node pkg="polarimetric_camera_server" type="camera_controller.py" name="CameraControllerGUI_$(arg user_camera_name)" output="screen" >
+        <param name="user_camera_name" type="string" value="$(arg user_camera_name)"/>
+    </node>
+</launch>

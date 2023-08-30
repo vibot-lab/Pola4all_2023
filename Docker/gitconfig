@@ -1,0 +1,13 @@
+[alias]
+    co = checkout
+    cob = checkout -b
+    br = branch
+    st = status
+    cp = cherry-pick
+    ci = commit
+[core]
+    editor = vim
+[color "status"]
+    added = yellow bold
+    changed = green
+    untracked = cyan

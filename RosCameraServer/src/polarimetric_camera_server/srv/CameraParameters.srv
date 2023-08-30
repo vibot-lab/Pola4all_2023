@@ -1,0 +1,24 @@
+# NOTE: All the variables here must have the same names as in CameraTypes.hpp:CameraState
+# When setting some paramter to the camera, we need to specify which one we want
+# to set
+int8 ALL=0
+int8 AUTO_EXPOSURE=1
+int8 AUTO_GAIN=2
+int8 AUTO_WHITE_BALANCE=3
+int8 FRAME_RATE=4
+int8 EXPOSURE_TIME=5
+int8 GAIN=6
+int8 WHITE_BALANCE_GAINS=7
+int8 NUM_OF_PARAMS=8
+
+float32 gain
+float32 exposureUs
+int16 frameRate
+float32 redGain
+float32 greenGain
+float32 blueGain
+bool autoGainEnabled
+bool autoExposureEnabled
+bool autoWhiteBalanceEnabled
+uint8 paramToChange # This variable must have a value from the constants defined at the beginning of this msg
+---

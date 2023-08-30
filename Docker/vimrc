@@ -1,0 +1,32 @@
+set number
+set encoding=utf-8
+if exists('+colorcolumn')
+      set colorcolumn=80
+else
+      au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+endif
+set expandtab
+set smartindent
+" defaults, these will be overriden by filetype specifics
+set tabstop=4    " number of spaces of a tab character
+set shiftwidth=4 " number of spaces to (auto) indent
+" per file indentation
+autocmd FileType html setlocal shiftwidth=2 tabstop=2
+autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
+autocmd FileType css setlocal shiftwidth=2 tabstop=2
+autocmd FileType scss setlocal shiftwidth=2 tabstop=2
+autocmd FileType python setlocal shiftwidth=4 tabstop=4
+
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd InsertLeave * match ExtraWhitespace /\s\+$/
+"autocmd BufWinLeave * call clearmatches()
+map <C-S-Left> <C-w><Left>
+map <C-S-Right> <C-w><Right>
+map <C-S-Up> <C-w><Up>
+map <C-S-Down> <C-w><Down>
+map <Tab> <C-W>w
+inoremap jk <ESC>
+set clipboard=unnamedplus

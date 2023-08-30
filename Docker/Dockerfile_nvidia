@@ -1,0 +1,91 @@
+FROM nvidia/opengl:1.0-glvnd-runtime-ubuntu20.04
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get dist-upgrade -y
+
+ARG USER
+ENV USERNAME=$USER
+RUN useradd -m -G sudo ${USERNAME} && \
+    echo ${USERNAME}:U6aMy0wojraho | chpasswd -e
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    software-properties-common \
+    apt-transport-https \
+    wget \
+    git \
+    sudo \
+    gdb \
+    gcc \
+    g++ \
+    make \
+    libglu1-mesa-dev \
+    cmake \
+    vim \
+    net-tools \
+    apt-utils \
+    tar \
+    language-pack-en \
+    curl && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add - && \
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ros-noetic-desktop-full && \
+    rm -rf /var/lib/apt/lists/*
+
+# Basler Camera driver
+COPY 3rdparty/pylon6.deb /home/${USERNAME}/pylon6.deb
+RUN apt-get update && dpkg -i /home/${USERNAME}/pylon6.deb && \
+    rm /home/${USERNAME}/pylon6.deb
+
+COPY 3rdparty/pylon_supl.tar.gz /home/${USERNAME}/pylon_supl.tar.gz
+RUN tar -C /opt -xzf /home/${USERNAME}/pylon_supl.tar.gz && \
+    rm /home/${USERNAME}/pylon_supl.tar.gz
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    qt5-default \
+    python3 \
+    python3-pip \
+    ipython3 \
+    python3-tk \
+    libopencv-dev \
+    python3-opencv \
+    python3-wstool && \
+    rm -rf /var/lib/apt/lists/*
+
+USER ${USERNAME}
+RUN python3 -m pip install pip --upgrade
+RUN python3 -m pip install matplotlib numpy scipy pygame ipdb
+
+USER root
+RUN wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | apt-key add - && \
+    dpkg --configure -a && \
+    add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y code && \
+    sed '/vscode/d' /etc/apt/sources.list > /tmp/sources.list && cp /tmp/sources.list /etc/apt/sources.list
+
+USER ${USERNAME}
+WORKDIR /home/${USERNAME}
+RUN git clone https://github.com/vibot-lab/Pola4all_2023.git Pola4All
+RUN cd Pola4All && ./build_project.sh -b
+
+USER root
+COPY ./gitconfig /home/${USERNAME}/gitconfig
+COPY ./bashrc /home/${USERNAME}/bashrc
+COPY ./vimrc /home/${USERNAME}/vimrc
+COPY ./docker-entrypoint.sh /home/${USERNAME}/docker-entrypoint.sh
+COPY udev_rules/*.rules /etc/udev/rules.d/
+RUN chmod +x /home/${USERNAME}/docker-entrypoint.sh
+#
+## Required for NVIDIA compatibility
+RUN mkdir -p /etc/OpenCL/vendors && echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+
+ENTRYPOINT /home/${USERNAME}/docker-entrypoint.sh
+USER ${USERNAME}
+
